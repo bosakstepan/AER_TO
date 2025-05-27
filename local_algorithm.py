@@ -133,7 +133,7 @@ def optimize(aer_q : AER_Q, lr : float, max_beta : int, max_i : int, wd : float)
         loss_value = loss.item()
         losses.append(loss_value)
         i += 1
-        if i > max_i:
+        if i > max_i-1:
             if beta < max_beta:
                 beta *= 2
                 i = 0
