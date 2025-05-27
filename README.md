@@ -19,7 +19,7 @@ The package uses AToM (see [1]) MoM matricies to optimize antenna topologies usi
 
 Sample data for antenna of electrical size $ka = 0.8$ and discretization $16\times10$ ($N = 934$, where $N$ is the number of degrees of freedom) are available in the Data folder. The data come with the MoM matricies and two density filters H. 
 
-The local algorithm implemented in [AER](./local_algorithm.py) required to know:
+The local algorithm implemented in [AER](./local_algorithm.py) requires:
 - the learning rate
 - the weight decay
 - maximum thresholding parameter
@@ -28,15 +28,15 @@ The local algorithm implemented in [AER](./local_algorithm.py) required to know:
 
 You can run the local algorithm by executing file [run](./run_local_alg.py). The parameters can be set using CLI or inside editor.
 
-The results of the optimization are save into .pth files carrying the optimized vector and an optimization log is saved into .csv file.
+The results of the optimization are saved into .pth files carrying the optimized vector and an optimization log is saved into .csv file.
 
-Post-processing can be done using the interactive python script [processor](./result_processor.py). Just set the paths of the .pth and .csv files correctly and select the appropriate filer and thresholding parameter.
+Post-processing can be done using the interactive python script [processor](./result_processor.py). Just set the paths of the .pth and .csv files correctly and select the appropriate filter and thresholding parameter beta.
 
 For the two filters available and,
 - the learning rate - 0.05;
 - the weight decay - 1e-3;
-- maximum thresholding parameter - 64;
-- maximum steps per thresholding level - 2100,
+- maximum thresholding parameter beta - 64;
+- maximum steps per thresholding level i_max - 2100,
 the obtained results for filter radiuses $r_1 = 0.15a$ and $r_2 = 0.2a$ are 
 
 $r_1$             |  $r_2$
