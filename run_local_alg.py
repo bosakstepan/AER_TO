@@ -9,7 +9,7 @@ from typing import Union
 np.random.seed(0)
 torch.manual_seed(0)
 
-def main(data : dict, file_name : str, p : Union[int, float], lr : float, max_beta : int, max_i : int, wd : float, mode : str = "filter1", max_gamma : float = 1, switch_delta : bool = True,  device : str = "cpu"):
+def main(data : dict, file_name : str, p : Union[int, float], lr : float, max_beta : int, max_i : int, wd : float, mode : str = "filter1", max_gamma : float = 1, di : float = 0.3,  device : str = "cpu"):
     """Local algorithm for AER optimization."""
     # load the data
     aer_q = aer.AER_Q(data, p, mode=mode, device=device)
@@ -18,7 +18,7 @@ def main(data : dict, file_name : str, p : Union[int, float], lr : float, max_be
     print(f"Port: {port}")
     # measure times
     start = time.perf_counter() # sometime time.time() is not precise enough so use time.perf_counter()
-    qer_qb, losses, betas = aer.optimize(aer_q, lr, max_beta, max_i, wd, max_gamma=max_gamma, switch_delta=switch_delta)
+    qer_qb, losses, betas = aer.optimize(aer_q, lr, max_beta, max_i, wd, max_gamma=max_gamma, di=di)
     end = time.perf_counter()
     elapsed = end - start
     Q, Qe, _, _, w  = qer_qb(max_beta)
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     parser.add_argument("--device", type=str, default="cpu")
     parser.add_argument("--mode", type=str, default="filter2") # Select filter mode: filter1, filter2, or no filter
     parser.add_argument("--max_gamma", type=float, default=0) # Hyperparameter for the maximum gamma, default is 0 (no regularization)
-    parser.add_argument("--switch_delta", action=argparse.BooleanOptionalAction, help="Switch delta regularization on/off", default=False) # self-resonance regularization switch
+    parser.add_argument("--di", type=float, default=0) # self-resonance regularization switch
     args = parser.parse_args()
     #epochs = args.epochs
     file_name = args.file_name
@@ -59,10 +59,10 @@ if __name__ == '__main__':
     device = args.device
     mode = args.mode
     max_gamma = args.max_gamma
-    switch_delta = args.switch_delta
+    di = args.di
     # load the data
     data = mat73.loadmat(data_path, use_attrdict=True)
     # Chose port here - center of the longer edge is save in the data as port_c -- index of the edge
     port = int(data["port_c"]) - 1 # Convert to zero-based index
-    main(data, file_name, p=port, lr=lr, max_beta=max_beta, max_i=max_i, wd=wd, mode=mode, max_gamma = max_gamma, switch_delta = switch_delta, device=device)
+    main(data, file_name, p=port, lr=lr, max_beta=max_beta, max_i=max_i, wd=wd, mode=mode, max_gamma = max_gamma, di = di, device=device)
     pass

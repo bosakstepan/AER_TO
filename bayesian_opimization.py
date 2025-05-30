@@ -14,7 +14,7 @@ mode = "filter2"
 delta = 0
 max_beta = 32
 max_gamma = 0 # switch the regularization off
-switch_delta = False # sets the self-resonance regularization
+di = 0 # sets the self-resonance regularization
 # load the gasr and evaluate bounds
 data = mat73.loadmat(path, use_attrdict=True) 
 # get the parametrization bound
@@ -44,7 +44,7 @@ def optimized_function(lr : float, wd : float, max_i : int, p: Union[int, float]
     aer_q = aer_q.to(device)
     # measure times
     start = time.time() # sometime time.time() is not precise enough so use time.perf_counter()
-    aer_qb, losses, betas = aer.optimize(aer_q, lr, max_beta, int(max_i), wd, max_gamma=max_gamma, switch_delta=switch_delta)
+    aer_qb, losses, betas = aer.optimize(aer_q, lr, max_beta, int(max_i), wd, max_gamma=max_gamma, di=di)
     end = time.time()
     elapsed = end - start
     _, _, _, _, w  = aer_qb(max_beta)
