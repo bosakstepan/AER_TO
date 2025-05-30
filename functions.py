@@ -69,3 +69,42 @@ def get_rgb_values(g, port):
         rgb_values[port] = torch.tensor([1.0, 0.0, 0.0])  # red override
 
     return rgb_values
+
+def get_pp_from_port(data, port: int):
+    """
+    Get the center point of the edge corresponding to the given port index.
+    GAS: dict containing mesh and BF data
+    port: index of the port (zero-based)
+    Returns: center point of the edge as a numpy array
+    """
+    TEC = data.Mesh.triangleEdgeCenters
+    BF = data.BF.data[:, 2].astype(int) - 1
+    BFCenters = TEC[BF, :]
+    # Same mask as before
+    mask = (((BFCenters[:, 0] == 0) & (BFCenters[:, 1] >= 0)) |
+            ((BFCenters[:, 1] == 0) & (BFCenters[:, 0] >= 0)))
+    BFCentersf = BFCenters[mask, :]
+    filtered_indices = np.where(mask)[0]
+
+    # Find index in filtered array that corresponds to the given port
+    idx_in_filtered = np.where(filtered_indices == port)[0]
+    if idx_in_filtered.size == 0:
+        raise ValueError(f"Port index {port} is not in the filtered list of edge centers.")
+    
+    # Return the center point corresponding to that filtered index
+    pp = BFCentersf[idx_in_filtered[0]]
+    return pp
+
+def get_p_from_pxpy(maxy, pxpy: np.ndarray) -> float:
+    """
+    Get the p value from pxpy coordinates.
+    maxy: maximum y-coordinate of the mesh
+    pxpy: numpy array with px and py coordinates
+    Returns: p value
+    """
+    px, py = pxpy[0], pxpy[1]
+    if py > 0:
+        p = maxy - py
+    else:
+        p = px + maxy
+    return p

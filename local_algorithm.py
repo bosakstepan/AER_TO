@@ -115,7 +115,7 @@ class AER_Q(nn.Module):
         w = self.w(gc) # Regularization term
         return Q, Qe, iF, gc, w
 
-def optimize(aer_q : AER_Q, lr : float, max_beta : int, max_i : int, wd : float):
+def optimize(aer_q : AER_Q, lr : float, max_beta : int, max_i : int, wd : float, max_gamma : float = 1, switch_delta : bool = False):
     optimizer = torch.optim.AdamW(aer_q.parameters(), lr=lr, weight_decay=wd)
     losses = []
     betas = []
@@ -137,9 +137,12 @@ def optimize(aer_q : AER_Q, lr : float, max_beta : int, max_i : int, wd : float)
             if beta < max_beta:
                 beta *= 2
                 i = 0
-                delta += di
+                if switch_delta:
+                    delta += di
             elif gamma == 0:
-                gamma = 1
+                if max_gamma == 0:
+                    break
+                gamma = max_gamma
                 i = 0
             else:
                 break

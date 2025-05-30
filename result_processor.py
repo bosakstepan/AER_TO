@@ -7,14 +7,13 @@ import torch
 import pandas as pd
 import local_algorithm as aer
 import mat73
-from plot_funcitons import plot_topology, get_rgb_values
+from functions import plot_topology, get_rgb_values
 #!%load_ext autoreload
 #!autoreload 2
 #!%matplotlib inline
 path_data = "./Data/ka_08/16x10/GASr.mat"
 data = mat73.loadmat(path_data, use_attrdict=True) 
-max_beta = 64
-delta = 1
+max_beta = 32
 np.random.seed(0)
 torch.manual_seed(0)
 #%% Load the model

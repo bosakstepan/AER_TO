@@ -25,6 +25,8 @@ The local algorithm implemented in [AER](./local_algorithm.py) requires:
 - maximum thresholding parameter
 - maximum steps per thresholding level
 - mode: {"filter1", "filter2"} - changes the index of H matrix for different filters
+- maximum gamma - the binary regularization
+- switch_delta : bool - self-resonance regularization
 
 You can run the local algorithm by executing file [run](./run_local_alg.py). The parameters can be set using CLI or inside editor.
 
@@ -33,19 +35,21 @@ The results of the optimization are saved into .pth files carrying the optimized
 Post-processing can be done using the interactive python script [processor](./result_processor.py). Just set the paths of the .pth and .csv files correctly and select the appropriate filter and thresholding parameter beta.
 
 For the two filters available and,
-- the learning rate - 0.05;
-- the weight decay - 1e-3;
-- maximum thresholding parameter beta - 64;
-- maximum steps per thresholding level i_max - 2100,
-the obtained results for filter radiuses $r_1 = 0.15a$ and $r_2 = 0.2a$ are 
+- the learning rate - 0.5 | 0.7;
+- the weight decay - 0.009 | 0.01;
+- maximum thresholding parameter beta - 32;
+- maximum steps per thresholding level i_max - 82 | 75,
+- maximum gamma - 0
+- switch delta (self-resonance regularization switch) - false
+the obtained results after thresholding for filter radiuses $r_1 = 0.15a$ and $r_2 = 0.2a$ are 
 
 $r_1$             |  $r_2$
 :-------------------------:|:-------------------------:
 ![](./docsrc/ka_08/filter1/output.png)  |  ![](./docsrc/ka_08/filter2/output.png)
-$Q/Q_\textrm{lb}^\textrm{TM} = 1.08$ | $Q/Q_\textrm{lb}^\textrm{TM} = 1.06$
-$Q_\textrm{E}/Q_\textrm{lb}^\textrm{TM} = 8.5\times 10^{-4}$ | $Q_\textrm{E}/Q_\textrm{lb}^\textrm{TM} = 1.5\times 10^{-5}$
+$Q/Q_\textrm{lb}^\textrm{TM} = 1.08$ | $Q/Q_\textrm{lb}^\textrm{TM} = 1.07$
+$Q_\textrm{E}/Q_\textrm{lb}^\textrm{TM} = 0.1$ | $Q_\textrm{E}/Q_\textrm{lb}^\textrm{TM} = 0.02$
 
-The results were obtained in $585$ s and $603$ s respectively on M1 Apple Silicon machine with 16GB of RAM. 
+The results were obtained in $15$ s and $14$ s respectively on M1 Apple Silicon machine with 16GB of RAM. 
 
 
 
