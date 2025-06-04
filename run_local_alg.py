@@ -9,7 +9,7 @@ from typing import Union
 np.random.seed(0)
 torch.manual_seed(0)
 
-def main(data : dict, file_name : str, p : Union[int, float], lr : float, max_beta : int, max_i : int, wd : float, mode : str = "filter1", max_gamma : float = 1, di : float = 0.3,  device : str = "cpu"):
+def main(data : dict, file_name : str, p : Union[int, float], lr : float, max_beta : int, max_i : int, wd : float, mode : str = "filter1", max_gamma : float = 1, di : float = 0.3,  device : str = "cpu", plot: bool = False):
     """Local algorithm for AER optimization."""
     # load the data
     aer_q = aer.AER_Q(data, p, mode=mode, device=device)
@@ -18,7 +18,7 @@ def main(data : dict, file_name : str, p : Union[int, float], lr : float, max_be
     print(f"Port: {port}")
     # measure times
     start = time.perf_counter() # sometime time.time() is not precise enough so use time.perf_counter()
-    qer_qb, losses, betas = aer.optimize(aer_q, lr, max_beta, max_i, wd, max_gamma=max_gamma, di=di)
+    qer_qb, losses, betas = aer.optimize(aer_q, lr, max_beta, max_i, wd, max_gamma=max_gamma, di=di, plot=plot)
     end = time.perf_counter()
     elapsed = end - start
     Q, Qe, _, _, w  = qer_qb(max_beta)
@@ -39,15 +39,16 @@ def main(data : dict, file_name : str, p : Union[int, float], lr : float, max_be
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--file_name", type=str, default="aer_q")
-    parser.add_argument("--data_path", type=str, default="./Data/ka_08/16x10/GASr.mat")
-    parser.add_argument("--lr", type=float, default = 0.7) # Hyperparameter for the learning rate
-    parser.add_argument("--wd", type=float, default = 0.01) # Hyperparameter for the weight decay
-    parser.add_argument("--max_i", type=int, default=int(75)) # Hyperparameter for the maximum number of iterations
+    parser.add_argument("--data_path", type=str, default="./Data/ka_08/20x12/GASr.mat")
+    parser.add_argument("--lr", type=float, default = 0.83) # Hyperparameter for the learning rate
+    parser.add_argument("--wd", type=float, default = 0.0077) # Hyperparameter for the weight decay
+    parser.add_argument("--max_i", type=int, default=int(62)) # Hyperparameter for the maximum number of iterations
     parser.add_argument("--max_beta", type=int, default=32) # Hyperparameter for the maximum beta
     parser.add_argument("--device", type=str, default="cpu")
-    parser.add_argument("--mode", type=str, default="filter2") # Select filter mode: filter1, filter2, or no filter
+    parser.add_argument("--mode", type=str, default="filter1") # Select filter mode: filter1, filter2, or no filter
     parser.add_argument("--max_gamma", type=float, default=0) # Hyperparameter for the maximum gamma, default is 0 (no regularization)
     parser.add_argument("--di", type=float, default=0) # self-resonance regularization switch
+    parser.add_argument("--plot", action='store_true', help="Enable plotting during optimization", default=False) # Enable plotting during optimization
     args = parser.parse_args()
     #epochs = args.epochs
     file_name = args.file_name
@@ -60,9 +61,10 @@ if __name__ == '__main__':
     mode = args.mode
     max_gamma = args.max_gamma
     di = args.di
+    plot = args.plot
     # load the data
     data = mat73.loadmat(data_path, use_attrdict=True)
     # Chose port here - center of the longer edge is save in the data as port_c -- index of the edge
     port = int(data["port_c"]) - 1 # Convert to zero-based index
-    main(data, file_name, p=port, lr=lr, max_beta=max_beta, max_i=max_i, wd=wd, mode=mode, max_gamma = max_gamma, di = di, device=device)
+    main(data, file_name, p=port, lr=lr, max_beta=max_beta, max_i=max_i, wd=wd, mode=mode, max_gamma = max_gamma, di = di, device=device, plot=plot)
     pass

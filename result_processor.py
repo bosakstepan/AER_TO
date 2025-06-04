@@ -11,21 +11,21 @@ from functions import plot_topology, get_rgb_values
 #!%load_ext autoreload
 #!autoreload 2
 #!%matplotlib inline
-path_data = "./Data/ka_08/16x10/GASr.mat"
+path_data = "./Data/ka_08/20x12/GASr.mat"
 data = mat73.loadmat(path_data, use_attrdict=True) 
 max_beta = 32
 np.random.seed(0)
 torch.manual_seed(0)
 #%% Load the model
-model_path = "./docsrc/ka_08/filter2/aer_q.pth"
-optimization_log_path = "./docsrc/ka_08/filter2/aer_q.csv"
+model_path = "./docsrc/ka_08/20x12/filter1/aer_q.pth"
+optimization_log_path = "./docsrc/ka_08/20x12/filter1/aer_q.csv"
 optimization_log = pd.read_csv(optimization_log_path)
 optimization_log.head()
 optimization_log.describe()
 port = int(optimization_log["port"].values[0])
 
 # load the model
-aer_q = aer.AER_Q(data, p = port, mode="filter2", device='cpu')
+aer_q = aer.AER_Q(data, p = port, mode="filter1", device='cpu')
 aer_q.load_state_dict(torch.load(model_path, weights_only=True, map_location=torch.device('cpu')))
 # test the model
 with torch.no_grad():
@@ -73,5 +73,9 @@ BF = data.BF
 
 
 # Plot the topology with the optimized design values
-plot_topology(data.Mesh, rgb_gray, data.BF, port=port)
-plot_topology(data.Mesh, rgb_bw, data.BF, port=port)
+fig = plt.figure(figsize=(8, 6))
+ax = fig.add_subplot(111, projection='3d')
+plot_topology(data.Mesh, ax, rgb_gray, data.BF, port=port)
+fig = plt.figure(figsize=(8, 6))
+ax = fig.add_subplot(111, projection='3d')
+plot_topology(data.Mesh, ax, rgb_bw, data.BF, port=port)

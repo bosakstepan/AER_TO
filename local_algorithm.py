@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
 from typing import Union
-import torch.nn.functional as F
-#import copy
+import functions
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import numpy as np
 
 class AER_Q(nn.Module):
@@ -33,7 +34,8 @@ class AER_Q(nn.Module):
         self.h = torch.tensor(data.H, dtype=torch.float32, requires_grad=False).to(device) # Density filters
         self.mask = torch.ones(self.N, dtype=torch.bool, device=self.device) # mask for the port
         self.mask[self.port] = False
-        
+        self.Mesh = data.Mesh # Mesh data
+        self.BF = data.BF # Boundary face data
         # optimization parameters
         self.weights = nn.Parameter(0.5*torch.ones(self.N-1, 1, dtype=torch.float32, requires_grad=True))
         self.ni = torch.tensor(0.5, dtype=torch.float32, device=self.device, requires_grad=False)
@@ -115,17 +117,46 @@ class AER_Q(nn.Module):
         w = self.w(gc) # Regularization term
         return Q, Qe, iF, gc, w
 
-def optimize(aer_q : AER_Q, lr : float, max_beta : int, max_i : int, wd : float, max_gamma : float = 1, di : float = 0.3):
+def optimize(aer_q : AER_Q, lr : float, max_beta : int, max_i : int, wd : float, max_gamma : float = 1, di : float = 0.3, plot = True):
     optimizer = torch.optim.AdamW(aer_q.parameters(), lr=lr, weight_decay=wd)
     losses = []
     betas = []
-    beta = 4
+    beta = 1
     gamma = 0
     delta = 0
     i = 0
+    if plot:
+        fig = plt.figure(figsize=(12, 4))
+        gs = gridspec.GridSpec(1, 3, width_ratios=[1, 1, 1])  # Equal widths
+
+        ax1 = fig.add_subplot(gs[0], projection='3d')  # 3D plot
+        ax2 = fig.add_subplot(gs[1])                   # 2D plot (loss)
+        ax3 = fig.add_subplot(gs[2])                   # 2D plot (beta)
+        ax2.set_xlabel("Epoch")
+        ax2.set_ylabel("Loss")
+        ax2.set_yscale("log")
+        loss_line, = ax2.plot([], [], 'b-')  # initialize empty line
+        ax3.set_xlabel("Epoch")
+        ax3.set_ylabel("Beta")
+        beta_line, = ax3.plot([], [], 'g-')  # initialize empty line
+        plt.tight_layout()
+        plt.ion()
     while True:
         optimizer.zero_grad()
-        Q, Qe, _, _, w = aer_q(beta)
+        Q, Qe, _, gc, w = aer_q(beta)
+        if plot:
+            x_vals = list(range(len(losses)))
+            loss_line.set_data(x_vals, losses)
+            beta_line.set_data(x_vals, betas)
+
+            ax2.relim()
+            ax2.autoscale_view()
+            ax3.relim()
+            ax3.autoscale_view()
+            ax1.cla()
+            x_t = functions.get_rgb_values(gc, aer_q.port)
+            functions.plot_topology(aer_q.Mesh, ax1, x_t, aer_q.BF, port=aer_q.port)
+            plt.pause(0.05)
         loss = ((Q + delta * Qe) / aer_q.qlb) + gamma*w
         # save progress
         betas.append(beta)
@@ -144,10 +175,14 @@ def optimize(aer_q : AER_Q, lr : float, max_beta : int, max_i : int, wd : float,
                 i = 0
             else:
                 break
-        if len(losses) % 100 == 0:
+        if len(losses) % 20 == 0:
             with torch.no_grad():
                 print(f'Epoch {len(losses)}, Loss: {loss.item()}, Qe/Qlb: {Qe.item()/aer_q.qlb}, Q/Qlb: {Q.item()/aer_q.qlb}, beta: {beta}, delta: {delta}, gamma: {gamma}, w: {w.item()}')
         loss.backward() # AD
         optimizer.step() # AdamW step
+    if plot:
+        plt.ioff()
+        plt.show(block=False)
+    # Final results
     return aer_q, losses, betas
     
