@@ -36,6 +36,7 @@ The results of the optimization are saved into .pth files carrying the optimized
 Post-processing can be done using the interactive python script [processor](./result_processor.py). Just set the paths of the .pth and .csv files correctly and select the appropriate filter and thresholding parameter beta.
 
 For the two filters available and,
+- initial beta (set in local_algorithm.py) - 4
 - the learning rate - 0.5 | 0.7;
 - the weight decay - 0.009 | 0.01;
 - maximum thresholding parameter beta - 32;
